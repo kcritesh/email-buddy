@@ -30,6 +30,7 @@ client.on(Events.MessageCreate, async (message) => {
   if (!message.content.startsWith(mention)) return;
 
   const args = message.content.slice(mention.length).trim().split(/\s+/);
+
   const command = args.shift()?.toLowerCase();
 
   if (command === "help") {
@@ -45,6 +46,7 @@ client.on(Events.MessageCreate, async (message) => {
 • \`@buddy price <symbol>\` – Get current price (e.g., BTC, ETH)
 • \`@buddy cryptonews\` – Get latest crypto news
 • \`@buddy marketcap <symbol>\` – Get market cap for a coin
+
     `);
   }
 
@@ -164,6 +166,81 @@ Volume 24h: ${coinData.VOLUME24HOUR}
         "❌ Error fetching market data. Try again later."
       );
     }
+  }
+
+  // Bahun Ko Khasi dialogues array
+  const khasi_quotes = [
+    "He he he, hasayo muji!",
+    "Paji Bahun!",
+    "Chup muji!",
+    "Haina ho Serey!",
+    "Yo khasi ta Bahun ko ho!",
+    "Aba k garne, Kothe? Khasi ta jungle bhagyo!",
+    "Paji Bahun ko khasi le sabaiko mukh ma hawa lagaidyo!",
+    "Ma janchu? Tero bau jancha, muji! Sanga sanga hid!",
+    "Oi Kothe, yo khasi her na, kati ramro! Dashainko bali perfect cha!",
+  ];
+
+  // Dialogue scenes array
+  const dialogue_scenes = [
+    `**Scene: Kothebahadur and Sherbahadur spot a goat for Dashain**
+
+Sherbahadur: "Oi Kothe, yo khasi her na, kati ramro! Dashainko bali perfect cha!"
+Kothebahadur: "He he he, hasayo muji! Yo khasi ta Bahun ko ho, paji Bahun le kinya hola!"
+Sherbahadur: "Haina ho Serey, yo khasi ta kei paisa ma bikcha? Lutna parcha!"
+Kothebahadur: "Chup muji, chor banna khojya ho? Bahun ko khasi choryo bhane Dashain bigrincha!"`,
+
+    `**Scene: The goat escapes, leading to chaos**
+
+Sherbahadur: "Aba k garne, Kothe? Khasi ta jungle bhagyo!"
+Kothebahadur: "Paji Bahun ko khasi le sabaiko mukh ma hawa lagaidyo! Ja, samatna ja!"
+Sherbahadur: "Ma janchu? Tero bau jancha, muji! Sanga sanga hid!"
+Kothebahadur: "He he he, hasayo muji! Thik cha, jaam jungle!"`,
+
+    `**Scene: Arguing about who will catch the goat**
+
+Kothebahadur: "Oi Shere, ta agadi ja, khasi samat!"
+Sherbahadur: "Ma agadi? Tero dimag thik cha? Ta ja na!"
+Kothebahadur: "Haina ho Serey, ta bhanda ma dhilo daudinchu!"
+Sherbahadur: "Chup muji! Aba dubai jana jaam, khasi bagyo!"`,
+  ];
+
+  // Command: Random Bahun Ko Khasi quote
+  if (command === "nepquote") {
+    const randomQuote =
+      khasi_quotes[Math.floor(Math.random() * khasi_quotes.length)];
+    return await message.reply(`🇳🇵 **Bahun Ko Khasi Quote:** ${randomQuote}`);
+  }
+
+  // Command: "hasayo" meme response
+  if (command === "hasayo") {
+    return await message.reply("🤣 **He he he, hasayo muji!**");
+  }
+
+  // Command: Information about Bahun Ko Khasi
+  if (command === "bahunko") {
+    return await message.reply(`
+🎬 **Bahun Ko Khasi by Official Twake Production**
+
+A popular Nepali comedy video famous for its raw street-style humor and iconic dialogues. The video follows the misadventures of characters like Kothebahadur and Sherbahadur around Dashain festival and a goat (Khasi).
+
+👨‍👨‍👦 **Main Characters:**
+• Kothebahadur 
+• Sherbahadur
+
+🗣️ **Famous Dialogues:**
+• "He he he, hasayo muji!"
+• "Paji Bahun!"
+• "Chup muji!"
+• "Haina ho Serey!"
+    `);
+  }
+
+  // Command: Random dialogue scene
+  if (command === "dialogue") {
+    const randomScene =
+      dialogue_scenes[Math.floor(Math.random() * dialogue_scenes.length)];
+    return await message.reply(randomScene);
   }
 
   if (command === "gandu") {

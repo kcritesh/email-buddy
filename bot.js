@@ -4,6 +4,7 @@ import { config } from "dotenv";
 import { Buffer } from "node:buffer";
 import fs from "fs";
 import { PrismaClient } from "@prisma/client";
+import fetch from "node-fetch";
 
 config(); // Load .env variables
 
@@ -39,6 +40,11 @@ client.on(Events.MessageCreate, async (message) => {
 • \`@buddy latest\` – Show latest subscriber
 • \`@buddy find <email>\` – Find subscriber by email
 • \`@buddy download\` – Export subscribers as CSV (Admin only)
+
+🪙 **Crypto Commands:**
+• \`@buddy price <symbol>\` – Get current price (e.g., BTC, ETH)
+• \`@buddy cryptonews\` – Get latest crypto news
+• \`@buddy marketcap <symbol>\` – Get market cap for a coin
     `);
   }
 
@@ -63,6 +69,101 @@ client.on(Events.MessageCreate, async (message) => {
     const user = await prisma.newsletter.findUnique({ where: { email } });
     if (!user) return await message.reply(`❌ No subscriber found.`);
     return await message.reply(`✅ Found: **${user.name}** (${user.email})`);
+  }
+
+  // CryptoCompare API - get current price
+  if (command === "price") {
+    const coin = (args[0] || "BTC").toUpperCase();
+
+    try {
+      const response = await fetch(
+        `https://min-api.cryptocompare.com/data/price?fsym=${coin}&tsyms=USD,EUR`
+      );
+
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.USD) {
+        return await message.reply(
+          `💹 **${coin}**: $${parseFloat(
+            data.USD
+          ).toLocaleString()} (€${parseFloat(data.EUR).toLocaleString()})`
+        );
+      } else {
+        return await message.reply(
+          "❌ Invalid coin symbol. Try something like BTC, ETH, SOL, etc."
+        );
+      }
+    } catch (error) {
+      console.error("CryptoCompare API error:", error);
+      return await message.reply(
+        "❌ Error fetching price data. Try again later."
+      );
+    }
+  }
+
+  // CryptoCompare API - get latest news
+  if (command === "cryptonews") {
+    try {
+      const response = await fetch(
+        "https://min-api.cryptocompare.com/data/v2/news/?lang=EN"
+      );
+      const data = await response.json();
+
+      if (data.Data && data.Data.length > 0) {
+        const news = data.Data.slice(0, 3); // Get top 3 news
+
+        let reply = "📰 **Latest Crypto News:**\n\n";
+        news.forEach((item) => {
+          reply += `**${item.title}**\n${item.url}\n\n`;
+        });
+
+        return await message.reply(reply);
+      } else {
+        return await message.reply("❌ No news available at the moment.");
+      }
+    } catch (error) {
+      console.error("CryptoCompare API error:", error);
+      return await message.reply(
+        "❌ Error fetching crypto news. Try again later."
+      );
+    }
+  }
+
+  // CryptoCompare API - get market cap
+  if (command === "marketcap") {
+    const coin = (args[0] || "BTC").toUpperCase();
+
+    try {
+      const response = await fetch(
+        `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${coin}&tsyms=USD`
+      );
+      const data = await response.json();
+
+      if (data.DISPLAY && data.DISPLAY[coin] && data.DISPLAY[coin].USD) {
+        const coinData = data.DISPLAY[coin].USD;
+
+        return await message.reply(`
+💰 **${coin}/USD Market Data:**
+Price: ${coinData.PRICE}
+24h Change: ${coinData.CHANGEPCT24HOUR}%
+Market Cap: ${coinData.MKTCAP}
+Volume 24h: ${coinData.VOLUME24HOUR}
+        `);
+      } else {
+        return await message.reply(
+          `❌ Couldn't find data for ${coin}. Try a valid coin symbol like BTC, ETH, SOL, etc.`
+        );
+      }
+    } catch (error) {
+      console.error("CryptoCompare API error:", error);
+      return await message.reply(
+        "❌ Error fetching market data. Try again later."
+      );
+    }
   }
 
   if (command === "gandu") {

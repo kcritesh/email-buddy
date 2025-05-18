@@ -6,7 +6,29 @@ import fs from "fs";
 import { PrismaClient } from "@prisma/client";
 import fetch from "node-fetch";
 
-config(); // Load .env variables
+// Load .env variables
+const result = config();
+if (result.error) {
+  console.warn(
+    "Warning: .env file not found or could not be parsed. Using process.env values."
+  );
+} else {
+  console.log("Environment variables loaded from .env");
+}
+
+// Clean up the token in case it has quotes
+const token = process.env.DISCORD_BOT_TOKEN?.replace(/["']/g, "");
+
+// Validate critical environment variables
+if (!token) {
+  console.error("ERROR: DISCORD_BOT_TOKEN environment variable is missing!");
+  process.exit(1);
+}
+
+if (!process.env.DATABASE_URL) {
+  console.error("ERROR: DATABASE_URL environment variable is missing!");
+  process.exit(1);
+}
 
 const prisma = new PrismaClient();
 
@@ -281,4 +303,10 @@ A popular Nepali comedy video famous for its raw street-style humor and iconic d
   }
 });
 
-client.login(process.env.DISCORD_BOT_TOKEN);
+client.login(token).catch((error) => {
+  console.error("Failed to login with Discord token:", error.message);
+  console.error(
+    "Please check that your Discord bot token is valid and try again."
+  );
+  process.exit(1);
+});

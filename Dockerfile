@@ -11,8 +11,11 @@ RUN npm install
 # Copy rest of the code
 COPY . .
 
-# Generate Prisma client
+# Make startup script executable
+RUN chmod +x /app/start.sh
+
+# Generate Prisma client without pulling (will do that at runtime)
 RUN npx prisma generate
 
-# Start the bot
-CMD ["node", "bot.js"]
+# Start the bot using the startup script
+CMD ["/app/start.sh"]

@@ -1,0 +1,13 @@
+Add .env
+
+```
+DATABASE_URL="postgresql://your_user:your_password@your_host:5432/your_db"
+DISCORD_BOT_TOKEN="your_discord_bot_token"
+```
+
+Migrate DB
+
+```npx prisma init
+npx prisma db pull
+npx prisma generate
+```
